@@ -10,13 +10,15 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class PedidoRepositoryImpl implements PedidoService {
+public class PedidoServiceImpl implements PedidoService {
 
     private final PedidoRepository repository;
     private final ItemPedidoRepositoy itemPedidoRepositoy;
     private final PedidoValidator pedidoValidator;
 
     public Pedido criarPedido(Pedido pedido){
-        return null;
+        repository.save(pedido);
+        itemPedidoRepositoy.saveAll(pedido.getItens());
+        return pedido;
     }
 }

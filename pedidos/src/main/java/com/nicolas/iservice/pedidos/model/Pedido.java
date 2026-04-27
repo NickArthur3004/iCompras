@@ -2,18 +2,18 @@ package com.nicolas.iservice.pedidos.model;
 
 import com.nicolas.iservice.pedidos.model.enums.StatusPedido;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "pedido")
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 public class Pedido {
 
     @Id
@@ -44,4 +44,10 @@ public class Pedido {
 
     @Column(name = "url_nf")
     private String urlNotaFiscal;
+
+    @Transient //não salva no banco
+    private DadosPagamento dadosPagamento;
+
+    @OneToMany(mappedBy = "pedido")
+    private List<ItemPedido> itens;
 }
