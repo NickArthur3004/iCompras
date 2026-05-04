@@ -2,6 +2,8 @@ package com.nicolas.iservice.pedidos.controllers;
 
 import com.nicolas.iservice.pedidos.controllers.dto.NovoPedidoDTO;
 import com.nicolas.iservice.pedidos.controllers.mappers.PedidoMapper;
+import com.nicolas.iservice.pedidos.model.ErroResponse;
+import com.nicolas.iservice.pedidos.model.exceptions.ValidationException;
 import com.nicolas.iservice.pedidos.services.PedidoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +22,14 @@ public class PedidoController {
 
     @PostMapping
     public ResponseEntity<Object> criar(@RequestBody NovoPedidoDTO dto) {
-        var pedido = mapper.map(dto);
-        var novoPedido = service.criarPedido(pedido);
-        return ResponseEntity.ok(novoPedido.getCodigo());
+        try {
+            var pedido = mapper.map(dto);
+            var novoPedido = service.criarPedido(pedido);
+            return ResponseEntity.ok(novoPedido.getCodigo());
+        }catch (ValidationException e){
+            var erro = new ErroResponse("Erro validação", e.getField(), e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
+        }
+
     }
 }
