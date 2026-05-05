@@ -1,0 +1,29 @@
+package com.nicolas.iservice.pedidos.controllers;
+
+import com.nicolas.iservice.pedidos.controllers.dto.RecebimentoCallbackPagamentoDTO;
+import com.nicolas.iservice.pedidos.model.Pedido;
+import com.nicolas.iservice.pedidos.services.PedidoService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/pedidos/callback-pagamentos")
+@RequiredArgsConstructor
+public class RecebimentoCallbackPagamentoController {
+
+    private final PedidoService pedidoService;
+
+    public ResponseEntity<Object> atualizarStatusPagamento(@RequestBody RecebimentoCallbackPagamentoDTO dto,
+                                                           @RequestHeader(required = true, name = "apiKey") String apiKey) {
+
+        pedidoService.atualizarStatusPagamento(dto.codigo(),
+                dto.chavePagamento(),
+                dto.status(), dto.observacao());
+
+        return ResponseEntity.ok().build();
+    }
+}
