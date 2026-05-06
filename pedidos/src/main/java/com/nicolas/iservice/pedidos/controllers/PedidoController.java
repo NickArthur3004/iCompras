@@ -1,8 +1,10 @@
 package com.nicolas.iservice.pedidos.controllers;
 
+import com.nicolas.iservice.pedidos.controllers.dto.AdicaoNovoPagamentoDTO;
 import com.nicolas.iservice.pedidos.controllers.dto.NovoPedidoDTO;
 import com.nicolas.iservice.pedidos.controllers.mappers.PedidoMapper;
 import com.nicolas.iservice.pedidos.model.ErroResponse;
+import com.nicolas.iservice.pedidos.model.exceptions.ItemNaoEncontradoException;
 import com.nicolas.iservice.pedidos.model.exceptions.ValidationException;
 import com.nicolas.iservice.pedidos.services.PedidoService;
 import lombok.RequiredArgsConstructor;
@@ -31,5 +33,16 @@ public class PedidoController {
             return ResponseEntity.badRequest().body(erro);
         }
 
+    }
+
+    @PostMapping("pagamentos")
+    public ResponseEntity<Object> adicionarNovoPagamento(@RequestBody AdicaoNovoPagamentoDTO dto) {
+        try {
+            service.adicionarNovoPagamento(dto.codigoPedido(), dto.dados(), dto.tipoPagamento());
+            return ResponseEntity.noContent().build();
+        }catch (ItemNaoEncontradoException e){
+            var erro = new ErroResponse("Item não encontrado", "codigoPedido", e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
+        }
     }
 }

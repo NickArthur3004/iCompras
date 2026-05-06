@@ -1,8 +1,11 @@
 package com.nicolas.iservice.pedidos.services.impl;
 
 import com.nicolas.iservice.pedidos.client.ServicoBancarioClient;
+import com.nicolas.iservice.pedidos.model.DadosPagamento;
 import com.nicolas.iservice.pedidos.model.Pedido;
 import com.nicolas.iservice.pedidos.model.enums.StatusPedido;
+import com.nicolas.iservice.pedidos.model.enums.TipoPagamento;
+import com.nicolas.iservice.pedidos.model.exceptions.ItemNaoEncontradoException;
 import com.nicolas.iservice.pedidos.repositories.ItemPedidoRepositoy;
 import com.nicolas.iservice.pedidos.repositories.PedidoRepository;
 import com.nicolas.iservice.pedidos.services.PedidoService;
@@ -60,5 +63,29 @@ public class PedidoServiceImpl implements PedidoService {
     private void realizarPersistencia(Pedido pedido) {
         repository.save(pedido);
         itemPedidoRepositoy.saveAll(pedido.getItens());
+    }
+
+    @Transactional
+    public void adicionarNovoPagamento(Long codigoPedido, String dadosCartao, TipoPagamento tipo) {
+        var pedidoEncontrado = repository.findById(codigoPedido);
+
+        if(pedidoEncontrado.isEmpty()){
+            throw new ItemNaoEncontradoException("Pedido não encontrado para o codigo informado.");
+        }
+
+        var pedido = pedidoEncontrado.get();
+
+        DadosPagamento dadosPagamento = new DadosPagamento();
+        dadosPagamento.setTipoPagamento(tipo);
+        dadosPagamento.setDados(dadosCartao);
+
+        pedido.setDadosPagamento(dadosPagamento);
+        pedido.setStatus(StatusPedido.REALIZADO);
+        pedido.setObservacoes("Novo pagamento realizado, aguardando o novo processamento.");
+
+        String novaChavePagamento = servicoBancarioClient.solicitarPagamento(pedido);
+        pedido.setChavePagamento(novaChavePagamento);
+
+        repository.save(pedido);
     }
 }
